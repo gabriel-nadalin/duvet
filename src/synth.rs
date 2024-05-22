@@ -51,8 +51,8 @@ fn osc(freq: f64, time: f64, kind: OscKind) -> f64 {
 }
 
 trait Envelope {
-    fn get_amplitude(&mut self, time: f64, time_on: f64, time_off: f64);
-    fn get_sample(&mut self, time: f64, time_on: f64, time_off: f64);
+    fn get_amplitude(&mut self, time: f64, time_on: f64, time_off: f64) -> f64;
+    fn get_sample(&mut self, time: f64, time_on: f64, time_off: f64) -> u8;
 }
 
 pub struct EnvelopeADSR {
@@ -74,7 +74,20 @@ impl EnvelopeADSR {
         }
     }
 
-    pub fn get_amplitude(&mut self, time: f64, time_on: f64, time_off: f64) -> f64 {
+    pub fn get_amplitude_u8(&mut self, time: f64, time_on: f64, time_off: f64) -> u8 {
+        let amplitude = self.get_amplitude(time, time_on, time_off);
+        let amplitude_shift = ((amplitude + 1.) / 2.) * 127.;
+        amplitude_shift.round() as u8
+    }
+
+    pub fn get_sample1(&mut self, time: f64, time_on: f64, time_off: f64) -> u8 {
+        let amplitude = self.get_amplitude(time, time_on, time_off) * 1.0 * osc(440., time, OscKind::Sine);
+        if amplitude > 0. {50} else {0}
+    }
+}
+
+impl Envelope for EnvelopeADSR {
+    fn get_amplitude(&mut self, time: f64, time_on: f64, time_off: f64) -> f64 {
         let mut amplitude = 0.;
         let mut release_amplitude = 0.;
         
@@ -122,25 +135,12 @@ impl EnvelopeADSR {
         amplitude
     }
 
-    pub fn get_amplitude_u8(&mut self, time: f64, time_on: f64, time_off: f64) -> u8 {
-        let amplitude = self.get_amplitude(time, time_on, time_off);
-        let amplitude_shift = ((amplitude + 1.) / 2.) * 127.;
-        amplitude_shift.round() as u8
-    }
-
-    pub fn get_sample(&mut self, time: f64, time_on: f64, time_off: f64) -> u8 {
+    fn get_sample(&mut self, time: f64, time_on: f64, time_off: f64) -> u8 {
         let amplitude = self.get_amplitude(time, time_on, time_off) * 1.0 * osc(440., time, OscKind::Sine);
         let sample = ((amplitude + 1.) / 2.) * 127.;
         sample.round() as u8
     }
 
-    pub fn get_sample1(&mut self, time: f64, time_on: f64, time_off: f64) -> u8 {
-        let amplitude = self.get_amplitude(time, time_on, time_off) * 1.0 * osc(440., time, OscKind::Sine);
-        if amplitude > 0. {50} else {0}
-    }
-}
-
-impl Envelope for EnvelopeADSR {
     
 }
 

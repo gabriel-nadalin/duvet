@@ -1,6 +1,6 @@
 mod synth;
 
-use synth::{Envelope};
+use synth::{EnvelopeA};
 use alsa::{pcm::{Access, Format, HwParams}, Direction, ValueOr, PCM};
 
 const SAMPLE_RATE: u32 = 44100;
