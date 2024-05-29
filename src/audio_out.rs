@@ -12,18 +12,25 @@ pub fn set_pcm_params(pcm: &alsa::PCM) {
     pcm.hw_params(&hwp).unwrap();
 }
 
+pub enum AudioMode {
+    Play,
+    Write,
+}
+
 pub struct AudioOut {
+    mode: AudioMode,
     pcm: PCM,
     buffer: Vec<u8>
 }
 
 impl AudioOut {
 
-    pub fn new() -> Self {
+    pub fn new(mode: AudioMode) -> Self {
         let pcm = PCM::new("default", Direction::Playback, false).unwrap();
         set_pcm_params(&pcm);
         let buffer = vec![];
         Self {
+            mode,
             pcm,
             buffer,
         }
@@ -32,8 +39,15 @@ impl AudioOut {
     pub fn audio_out(&mut self, sample: u8) {
         self.buffer.push(sample);
         if self.buffer.len() >= BUFFER_SIZE {
-            let io = self.pcm.io_u8().unwrap();
-            io.writei(&self.buffer).unwrap();
+            match self.mode {
+                AudioMode::Play => {
+                    let io = self.pcm.io_u8().unwrap();
+                    io.writei(&self.buffer).unwrap();
+                }
+                AudioMode::Write => {
+                    //TODO
+                }
+            }
             self.buffer.clear();
         }
     }

@@ -1,13 +1,17 @@
 use std::f32::consts::PI;
 
+use num_traits::Pow;
+
 use crate::SAMPLE_RATE;
 
+#[derive(Clone, Copy)]
 pub enum Waveform {
     Sine,
     Square,
     Triangle,
     Sawtooth,
     AnalogSawtooth,
+    Exp,
 }
 
 pub struct Oscillator {
@@ -66,6 +70,7 @@ impl Oscillator {
                 }
                 2.0 * sample - 1.0
             }
+            Waveform::Exp => (2. * self.phase - 1.).powf(3.) + 0.5
         };
         self.phase = (self.phase + self.frequency / SAMPLE_RATE as f32) % 1.0;
         sample

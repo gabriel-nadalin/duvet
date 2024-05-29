@@ -1,0 +1,42 @@
+use std::collections::HashMap;
+
+use crate::{envelope::{self, Envelope, EnvelopeState}, midi2freq, note::Note, oscillator::Waveform};
+
+pub struct Instrument {
+    waveform: Waveform,
+    envelope: Envelope,
+    notes: HashMap<u8, Note>, // Key is MIDI note number
+}
+
+impl Instrument {
+    pub fn new(waveform: Waveform, envelope: Envelope) -> Self {
+        Instrument {
+            waveform,
+            envelope,
+            notes: HashMap::new(),
+        }
+    }
+
+    pub fn note_on(&mut self, midi_note: u8) {
+        let frequency = midi2freq(midi_note);
+        let mut note = Note::from_env(self.waveform, frequency, self.envelope);
+        note.note_on();
+        self.notes.insert(midi_note, note);
+    }
+
+    pub fn note_off(&mut self, midi_note: u8) {
+        if let Some(note) = self.notes.get_mut(&midi_note) {
+            note.note_off();
+        }
+    }
+
+    pub fn next_sample(&mut self) -> f32 {
+        let mut sample = 0.0;
+        self.notes.retain(|_, note| {
+            let note_sample = note.next_sample();
+            sample += note_sample;
+            matches!(note.state(), EnvelopeState::Off)
+        });
+        sample
+    }
+}

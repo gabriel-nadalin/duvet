@@ -1,27 +1,21 @@
-use crate::oscillator::{Oscillator, Waveform};
-use crate::envelope::Envelope;
+use crate::instrument::Instrument;
 
 pub struct Synth {
-    oscillator: Oscillator,
-    envelope: Envelope,
+    pub instruments: Vec<Instrument>,
 }
 
 impl Synth {
-    pub fn new(oscillator: Oscillator, envelope: Envelope) -> Self {
-        Self { oscillator, envelope }
+    pub fn new() -> Self {
+        Synth {
+            instruments: Vec::new(),
+        }
     }
 
-    pub fn note_on(&mut self, frequency: f32) {
-        self.oscillator.set_frequency(frequency);
-        self.envelope.trigger();
-    }
-
-    pub fn note_off(&mut self) {
-        self.envelope.release();
+    pub fn add_instrument(&mut self, instrument: Instrument) {
+        self.instruments.push(instrument);
     }
 
     pub fn next_sample(&mut self) -> f32 {
-        let sample = self.oscillator.next_sample();
-        sample * self.envelope.next_sample()
+        self.instruments.iter_mut().map(|instr| instr.next_sample()).sum()
     }
 }
