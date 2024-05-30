@@ -28,7 +28,7 @@ fn main() {
     // let mut osc = Oscillator::new(Waveform::Sine, 80.);
     // let mut env = Envelope::new(0.01, 0.1, 1., 0.1);
     let mut synth = Synth::new();
-    let voice = Instrument::new(Waveform::Square, Envelope::new(1., 1.1, 1.6, 1.1));
+    let voice = Instrument::new(Waveform::Square, Envelope::new(0.02, 0.03, 0.7, 0.05));
     synth.add_instrument(voice);
     
     let tempo = 500_000;
@@ -36,11 +36,11 @@ fn main() {
     let mut cursor = 0;
     
     let mut smf = Smf::parse(include_bytes!("../duvet.mid")).unwrap();
-    let track = &mut smf.tracks[0];
+    let track = &mut smf.tracks[2];
     let mut event = track[cursor];
     let mut counter = (delta2us(event.delta.as_int(), tempo, ticks_per_beat) as u64 * SAMPLE_RATE as u64 / pow(10., 6) as u64) as u32;
     
-    synth.instruments[0].note_on(69);
+    // synth.instruments[0].note_on(69);
     
     loop {
         if counter == 0 {
@@ -50,10 +50,12 @@ fn main() {
                 TrackEventKind::Midi { channel, message } => {
                     match message {
                         MidiMessage::NoteOn { key, vel } => {
-                            // println!("{}", midi_to_freq(key.as_int()));
+                            // println!("{}", midi2freq(key.as_int()));
                             synth.instruments[0].note_on(key.as_int())
                         }
-                        MidiMessage::NoteOff { key, vel } => synth.instruments[0].note_off(key.as_int()),
+                        MidiMessage::NoteOff { key, vel } => {
+                            synth.instruments[0].note_off(key.as_int());
+                        }
                         _ => {}
                     }
                 }
@@ -67,7 +69,7 @@ fn main() {
             counter -= 1;
         }
         let sample = bipolar2u8(synth.next_sample());
-        audio_out.audio_out(sample);
+        audio_out.send(sample);
     }
     audio_out.drain();
 }

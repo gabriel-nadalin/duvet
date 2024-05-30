@@ -35,7 +35,7 @@ impl Instrument {
         self.notes.retain(|_, note| {
             let note_sample = note.next_sample();
             sample += note_sample;
-            matches!(note.state(), EnvelopeState::Off)
+            !matches!(note.state(), EnvelopeState::Off)
         });
         sample
     }

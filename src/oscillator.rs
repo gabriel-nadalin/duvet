@@ -4,7 +4,7 @@ use num_traits::Pow;
 
 use crate::SAMPLE_RATE;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Waveform {
     Sine,
     Square,
@@ -14,6 +14,7 @@ pub enum Waveform {
     Exp,
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct Oscillator {
     waveform: Waveform,
     frequency: f32,

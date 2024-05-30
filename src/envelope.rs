@@ -1,6 +1,6 @@
 use crate::SAMPLE_RATE;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Envelope {
     attack: f32,
     decay: f32,
@@ -11,7 +11,7 @@ pub struct Envelope {
     time: f32,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum EnvelopeState {
     Idle,
     Attack,
@@ -52,7 +52,6 @@ impl Envelope {
 
     pub fn get_amplitude(&mut self) -> f32 {
         self.time += 1. / SAMPLE_RATE as f32;
-        println!("{}", self.time);
         match self.state {
             EnvelopeState::Idle => {
                 self.level = 0.;

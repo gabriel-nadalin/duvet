@@ -1,5 +1,6 @@
 use crate::{envelope::{Envelope, EnvelopeState}, oscillator::{Oscillator, Waveform}};
 
+#[derive(Clone, Copy, Debug)]
 pub struct Note {
     oscillator: Oscillator,
     envelope: Envelope,
