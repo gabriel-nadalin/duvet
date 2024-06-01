@@ -30,7 +30,7 @@ impl Oscillator {
             frequency,
             phase: 0.0,
             duty: 0.5,              // duty cycle; only used for square waves
-            harmonics: 40,          // number of harmonics summed; only used for sawtooth waves
+            harmonics: 50,          // number of harmonics summed; only used for sawtooth waves
         }
     }
 
@@ -69,7 +69,7 @@ impl Oscillator {
                 for k in 1..self.harmonics {
                     sample += (2.0 * PI * k as f32 * self.phase).sin() / k as f32;
                 }
-                2.0 * sample - 1.0
+                -2.0/PI * sample
             }
             Waveform::Exp => (2. * self.phase - 1.).powf(3.) + 0.5
         };

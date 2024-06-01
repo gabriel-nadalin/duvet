@@ -1,4 +1,4 @@
-use std::f32::consts::{E, LN_2};
+use std::f32::consts::LN_2;
 
 use crate::SAMPLE_RATE;
 
@@ -38,7 +38,6 @@ pub enum EnvelopeState {
     Decay,
     Sustain,
     Release,
-    Off,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -108,11 +107,8 @@ impl Envelope {
             EnvelopeState::Release => {
                 self.level = self.kind.release(self.time, self.sustain, self.release).max(0.);
                 if self.time >= self.release {
-                    self.state = EnvelopeState::Off;
+                    self.state = EnvelopeState::Idle;
                 }
-            }
-            EnvelopeState::Off => {
-                self.level = 0.;
             }
         }
         self.level
