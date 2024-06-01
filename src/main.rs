@@ -17,18 +17,18 @@ const SAMPLE_RATE: u32 = 8000;
 const BUFFER_SIZE: usize = 1024;
 
 fn bipolar2u8(sample: f32) -> u8 {
-    let sample = ((sample + 1.) / 2.) * 127.;
+    let sample = ((sample + 1.) / 2.) * 255.;
     sample.round() as u8
 }
 
 fn main() {
 
-    let mut audio_out = AudioOut::new(AudioMode::Play);
+    let mut audio_out = AudioOut::new(AudioMode::Record);
 
     // let mut osc = Oscillator::new(Waveform::Sine, 80.);
     // let mut env = Envelope::new(0.01, 0.1, 1., 0.1);
     let mut synth = Synth::new();
-    let voice = Instrument::new(Waveform::Square, Envelope::new(0.02, 0.03, 0.7, 0.05));
+    let voice = Instrument::lead_sine(0.5);
     synth.add_instrument(voice);
     
     let tempo = 500_000;
@@ -36,38 +36,45 @@ fn main() {
     let mut cursor = 0;
     
     let mut smf = Smf::parse(include_bytes!("../duvet.mid")).unwrap();
-    let track = &mut smf.tracks[2];
+    let track = &mut smf.tracks[0];
     let mut event = track[cursor];
     let mut counter = (delta2us(event.delta.as_int(), tempo, ticks_per_beat) as u64 * SAMPLE_RATE as u64 / pow(10., 6) as u64) as u32;
     
-    // synth.instruments[0].note_on(69);
+    synth.instruments[0].note_on(34);
     
     loop {
-        if counter == 0 {
-            cursor += 1;
-            if cursor >= track.len() { break }
-            match event.kind {
-                TrackEventKind::Midi { channel, message } => {
-                    match message {
-                        MidiMessage::NoteOn { key, vel } => {
-                            // println!("{}", midi2freq(key.as_int()));
-                            synth.instruments[0].note_on(key.as_int())
-                        }
-                        MidiMessage::NoteOff { key, vel } => {
-                            synth.instruments[0].note_off(key.as_int());
-                        }
-                        _ => {}
-                    }
-                }
-                _ => {}
-            }
-            event = track[cursor];
-            counter = (delta2us(event.delta.as_int(), tempo, ticks_per_beat) as u64 * SAMPLE_RATE as u64 / pow(10., 6) as u64) as u32;
-            // println!("{counter}");
+        cursor += 1;
+        if cursor == SAMPLE_RATE as usize * 3 {
+            synth.instruments[0].note_off(69);
         }
-        else {
-            counter -= 1;
+        if cursor == SAMPLE_RATE as usize * 6 {
+            break
         }
+        // if counter == 0 {
+        //     cursor += 1;
+        //     if cursor >= track.len() { break }
+        //     match event.kind {
+        //         TrackEventKind::Midi { channel, message } => {
+        //             match message {
+        //                 MidiMessage::NoteOn { key, vel } => {
+        //                     // println!("{}", midi2freq(key.as_int()));
+        //                     synth.instruments[0].note_on(key.as_int())
+        //                 }
+        //                 MidiMessage::NoteOff { key, vel } => {
+        //                     synth.instruments[0].note_off(key.as_int());
+        //                 }
+        //                 _ => {}
+        //             }
+        //         }
+        //         _ => {}
+        //     }
+        //     event = track[cursor];
+        //     counter = (delta2us(event.delta.as_int(), tempo, ticks_per_beat) as u64 * SAMPLE_RATE as u64 / pow(10., 6) as u64) as u32;
+        //     // println!("{counter}");
+        // }
+        // else {
+        //     counter -= 1;
+        // }
         let sample = bipolar2u8(synth.next_sample());
         audio_out.send(sample);
     }

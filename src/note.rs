@@ -1,22 +1,25 @@
-use crate::{envelope::{Envelope, EnvelopeState}, oscillator::{Oscillator, Waveform}};
+use crate::{envelope::{Envelope, EnvelopeKind, EnvelopeState}, oscillator::{Oscillator, Waveform}};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Note {
     oscillator: Oscillator,
+    lfo: Oscillator,
     envelope: Envelope,
 }
 
 impl Note {
-    pub fn new(waveform: Waveform, frequency: f32, attack: f32, decay: f32, sustain: f32, release: f32) -> Self {
+    pub fn new(waveform: Waveform, frequency: f32, lfo_waveform: Waveform, lfo_frequency: f32, attack: f32, decay: f32, sustain: f32, release: f32, env_kind: EnvelopeKind) -> Self {
         Self {
             oscillator: Oscillator::new(waveform, frequency),
-            envelope: Envelope::new(attack, decay, sustain, release),
+            lfo: Oscillator::new(lfo_waveform, lfo_frequency),
+            envelope: Envelope::new(attack, decay, sustain, release, env_kind),
         }
     }
 
-    pub fn from_env(waveform: Waveform, frequency: f32, envelope: Envelope) -> Self {
+    pub fn from_env(waveform: Waveform, frequency: f32, lfo: Oscillator, envelope: Envelope) -> Self {
         Self {
             oscillator: Oscillator::new(waveform, frequency),
+            lfo,
             envelope
         }
     }
@@ -35,6 +38,8 @@ impl Note {
 
     pub fn next_sample(&mut self) -> f32 {
         let amplitude = self.envelope.get_amplitude();
+        let lfo_value = self.lfo.next_sample();
+        // self.oscillator.set_frequency(self.oscillator.frequency() * (1.0 + lfo_value * 0.1));
         amplitude * self.oscillator.next_sample()
     }
 }
