@@ -17,66 +17,53 @@ pub fn set_pcm_params(pcm: &alsa::PCM) {
     pcm.hw_params(&hwp).unwrap();
 }
 
-trait Writer {
-    fn write(&mut self, buffer: &Vec<u8>);
-    fn drain(&self);
+pub enum Writer {
+    PCM(PCM),
+    WAV(WavWriter<BufWriter<File>>),
 }
 
-struct PCMWriter {
-    pcm: PCM,
-}
+impl Writer {
+    fn new(mode: AudioMode) -> Self {
+        match mode {
+            AudioMode::Play => {
+                let pcm = PCM::new("default", Direction::Playback, false).unwrap();
+                set_pcm_params(&pcm);
 
-impl PCMWriter {
-    fn new() -> Self {
-        let pcm = PCM::new("default", Direction::Playback, false).unwrap();
-        set_pcm_params(&pcm);
-        Self {
-            pcm,
-        }
-    }
-}
-
-impl Writer for PCMWriter {
-    fn write(&mut self, buffer: &Vec<u8>) {
-        let io = self.pcm.io_u8().unwrap();
-        io.writei(buffer).unwrap();
-    }
-
-    fn drain(&self) {
-        self.pcm.drain().unwrap();
-    }
-}
-
-struct WAVWriter {
-    writer: WavWriter<BufWriter<File>>,
-}
-
-impl WAVWriter {
-    fn new() -> Self {
+                Self::PCM(pcm)
+            }
+            AudioMode::Record => {
+                let spec = hound::WavSpec {
+                    channels: 1,
+                    sample_rate: SAMPLE_RATE,
+                    bits_per_sample: 8,
+                    sample_format: hound::SampleFormat::Int,
+                };
+                let writer = hound::WavWriter::create("output.wav", spec).unwrap();
         
-        let spec = hound::WavSpec {
-            channels: 1,
-            sample_rate: SAMPLE_RATE,
-            bits_per_sample: 8,
-            sample_format: hound::SampleFormat::Int,
-        };
-
-        let writer = hound::WavWriter::create("output.wav", spec).unwrap();
-
-        Self {
-            writer,
+                Self::WAV(writer)
+            }
         }
     }
-}
 
-impl Writer for WAVWriter {
     fn write(&mut self, buffer: &Vec<u8>) {
-        for &sample in buffer {
-            self.writer.write_sample((sample as i16 - 128) as i8).unwrap();
+        match self {
+            Self::PCM(pcm) => {
+                let io = pcm.io_u8().unwrap();
+                io.writei(buffer).unwrap();
+            }
+            Self::WAV(writer) => {
+                for &sample in buffer {
+                    writer.write_sample((sample as i16 - 128) as i8).unwrap();
+                }
+            }
         }
     }
 
-    fn drain(&self) {
+    fn drain(&mut self) {
+        match self {
+            Self::PCM(pcm) => pcm.drain().unwrap(),
+            Self::WAV(writer) => {}
+        }
     }
 }
 
@@ -86,19 +73,16 @@ pub enum AudioMode {
 }
 
 pub struct AudioOut {
-    writer: Box<dyn Writer>,
+    writer: Writer,
     buffer: Vec<u8>
 }
 
 impl AudioOut {
 
     pub fn new(mode: AudioMode) -> Self {
-        let writer: Box<dyn Writer> = match mode {
-            AudioMode::Play => Box::new(PCMWriter::new()),
-            AudioMode::Record => Box::new(WAVWriter::new()),
-        };
-
+        let writer = Writer::new(mode);
         let buffer = vec![];
+
         Self {
             writer,
             buffer,
@@ -113,7 +97,7 @@ impl AudioOut {
         }
     }
 
-    pub fn drain(&self) {
+    pub fn drain(&mut self) {
         self.writer.drain();
     }
 }
