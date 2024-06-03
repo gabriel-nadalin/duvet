@@ -1,21 +1,35 @@
+use std::collections::HashMap;
+
 use crate::instrument::Instrument;
 
 pub struct Synth {
-    pub instruments: Vec<Instrument>,
+    instruments: HashMap<u8, Instrument>, // Key is instrument name or ID
 }
 
 impl Synth {
     pub fn new() -> Self {
         Synth {
-            instruments: Vec::new(),
+            instruments: HashMap::new(),
         }
     }
 
-    pub fn add_instrument(&mut self, instrument: Instrument) {
-        self.instruments.push(instrument);
+    pub fn add_instrument(&mut self, channel: u8, instrument: Instrument) {
+        self.instruments.insert(channel, instrument);
+    }
+
+    pub fn note_on(&mut self, channel: u8, midi_note: u8) {
+        if let Some(instrument) = self.instruments.get_mut(&channel) {
+            instrument.note_on(midi_note);
+        }
+    }
+
+    pub fn note_off(&mut self, channel: u8, midi_note: u8) {
+        if let Some(instrument) = self.instruments.get_mut(&channel) {
+            instrument.note_off(midi_note);
+        }
     }
 
     pub fn next_sample(&mut self) -> f32 {
-        self.instruments.iter_mut().map(|instr| instr.next_sample()).sum()
+        self.instruments.values_mut().map(|instr| instr.next_sample()).sum()
     }
 }
