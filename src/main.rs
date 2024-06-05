@@ -7,33 +7,37 @@ mod synth;
 mod midi_scheduler;
 mod player;
 
+use std::{io::stdout, thread, time::Duration};
+
 use audio_out::{AudioMode, AudioOut};
 use instrument::Instrument;
-use player::Player;
+use player::{bipolar2u8, Player};
 use synth::Synth;
+use termion::raw::IntoRawMode;
 
 const SAMPLE_RATE: u32 = 8000;
+const BIT_DEPTH: u16 = 8;
 const BUFFER_SIZE: usize = 1024;
 
 
 
 fn main() {
-    let mut synth = Synth::new();
-    let voice = Instrument::lead_sawtooth(0.3);
-    let bass = Instrument::lead_square(0.3);
-    let guitar = Instrument::lead_triangle(0.3);
+    let mut drum_kit = Instrument::drum_kit(1.);
+    let mut out = AudioOut::new(AudioMode::Play);
 
-    synth.add_instrument(0, voice);
-    synth.add_instrument(1, bass);
-    synth.add_instrument(2, guitar);
+    let mut player = Player::new_midi(include_bytes!("../midi/duvet.mid"), AudioMode::Play);
+    // let mut player = Player::new_keyboard(AudioMode::Play);
 
-    let mut player = Player::new_midi(include_bytes!("../duvet.mid"), AudioMode::Record);
-    
-    // synth.instruments[0].note_on(69);
-    
-    loop {
-        player.update();
+    while player.update() {
+        // thread::sleep(Duration::from_millis(50));
     }
+    player.drain();
+
+    // drum_kit.note_on(57);
+    // loop {
+    //     out.send(bipolar2u8(drum_kit.next_sample()));
+    // }
+    
 }
 
 

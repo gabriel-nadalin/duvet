@@ -25,7 +25,6 @@ impl MidiScheduler {
                 }
                 else if let midly::TrackEventKind::Meta(message) = &event.kind {
                     if let midly::MetaMessage::Tempo(t) = message {
-                        println!("{}", t.as_int());
                         tempo = t.as_int();
                     }
                 }

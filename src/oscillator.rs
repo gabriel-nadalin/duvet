@@ -1,7 +1,5 @@
 use std::f32::consts::PI;
 
-use num_traits::Pow;
-
 use crate::SAMPLE_RATE;
 
 #[derive(Clone, Copy, Debug)]

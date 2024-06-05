@@ -6,7 +6,7 @@ use alsa::pcm::{Access, Format, HwParams, IO, PCM};
 use alsa::ValueOr;
 use hound::{self, WavWriter};
 
-use crate::{BUFFER_SIZE, SAMPLE_RATE};
+use crate::{BIT_DEPTH, BUFFER_SIZE, SAMPLE_RATE};
 
 pub fn set_pcm_params(pcm: &alsa::PCM) {
     let hwp = HwParams::any(&pcm).unwrap();
@@ -35,7 +35,7 @@ impl Writer {
                 let spec = hound::WavSpec {
                     channels: 1,
                     sample_rate: SAMPLE_RATE,
-                    bits_per_sample: 8,
+                    bits_per_sample: BIT_DEPTH,
                     sample_format: hound::SampleFormat::Int,
                 };
                 let writer = hound::WavWriter::create("output.wav", spec).unwrap();
