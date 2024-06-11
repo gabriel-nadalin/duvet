@@ -1,4 +1,4 @@
-use crate::{envelope::{Envelope, EnvelopeKind, EnvelopeState}, oscillator::{Oscillator, Waveform}};
+use crate::synth::{envelope::{Envelope, EnvelopeKind, EnvelopeState}, oscillator::{Oscillator, Waveform}};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Note {
@@ -37,8 +37,13 @@ impl Note {
         self.envelope.state()
     }
 
-    pub fn note_on(&mut self) {
-        self.envelope.trigger();
+    pub fn note_on(&mut self, legato: bool) {
+        if legato {
+            let amplitude = self.envelope.get_amplitude();
+            self.envelope.trigger_legato(amplitude);
+        } else {
+            self.envelope.trigger();
+        }
     }
 
     pub fn note_off(&mut self) {

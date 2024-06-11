@@ -1,6 +1,12 @@
+pub mod oscillator;
+pub mod envelope;
+pub mod instrument;
+pub mod drum_machine;
+pub mod note;
+
 use std::collections::HashMap;
 
-use crate::instrument::Instrument;
+use instrument::Instrument;
 
 pub struct Synth {
     instruments: HashMap<u8, Instrument>, // Key is instrument name or ID

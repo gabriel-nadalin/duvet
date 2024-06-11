@@ -3,7 +3,7 @@ use std::{collections::HashSet, io::Read};
 use midly::MidiMessage;
 use termion::{async_stdin, event::Key, input::TermRead};
 
-use crate::{audio_out::{AudioMode, AudioOut}, instrument::Instrument, midi_scheduler::MidiScheduler, synth::Synth, SAMPLE_RATE};
+use crate::{audio_out::{AudioMode, AudioOut}, synth::instrument::Instrument, midi_scheduler::MidiScheduler, synth::Synth, SAMPLE_RATE};
 
 pub struct MidiPlayer {
     scheduler: MidiScheduler,
@@ -173,7 +173,7 @@ impl Player {
     }
 
     pub fn update(&mut self) -> bool {
-        let mut condition = false;
+        let condition;
         match &mut self.kind {
             PlayerKind::Midi(midi_player) => {
                 condition = midi_player.update(&mut self.synth, self.time);

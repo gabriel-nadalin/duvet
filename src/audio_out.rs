@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::BufWriter;
 
 use alsa::Direction;
-use alsa::pcm::{Access, Format, HwParams, IO, PCM};
+use alsa::pcm::{Access, Format, HwParams, PCM};
 use alsa::ValueOr;
 use hound::{self, WavWriter};
 
@@ -62,7 +62,7 @@ impl Writer {
     fn drain(&mut self) {
         match self {
             Self::PCM(pcm) => pcm.drain().unwrap(),
-            Self::WAV(writer) => {}
+            Self::WAV(_writer) => {}
         }
     }
 }

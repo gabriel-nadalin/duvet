@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{envelope::{Envelope, EnvelopeKind, EnvelopeState}, midi2freq, note::Note, oscillator::{Oscillator, Waveform}};
+use crate::synth::{envelope::{Envelope, EnvelopeKind, EnvelopeState}, note::Note, oscillator::{Oscillator, Waveform}, drum_machine::DrumMachine};
 
 pub enum InstrumentKind {
     Melodic,
@@ -31,23 +31,22 @@ impl Instrument {
     }
 
     pub fn note_on(&mut self, midi_note: u8) {
-        let mut note;
-        match self.kind {
+        let mut note = match self.kind {
             InstrumentKind::Melodic => {
                 let frequency = midi2freq(midi_note);
-                note = Note::from_env(self.waveform, frequency, self.lfo_amplitude, self.lfo, self.envelope, 0.);
+                Note::from_env(self.waveform, frequency, self.lfo_amplitude, self.lfo, self.envelope, 0.)
             }
             InstrumentKind::Percussive => {
                 match midi_note {
-                    35 | 36 | 43 => note = Instrument::kick(),
-                    40 | 45 | 47 => note = Instrument::snare(),
-                    44 | 46 | 53 => note = Instrument::hihat(),
-                    49 | 52 | 57 => note = Instrument::cymbal(),
+                    35 | 36 | 43 => DrumMachine::kick(),
+                    40 | 45 | 47 => DrumMachine::snare(),
+                    44 | 46 | 53 => DrumMachine::hihat(),
+                    49 | 52 | 57 => DrumMachine::cymbal(),
                     _ => return
                 }
             }
-        }
-        note.note_on();
+        };
+        note.note_on(true);
         self.notes.insert(midi_note, note);
     }
 
@@ -106,32 +105,12 @@ impl Instrument {
         let lfo = Oscillator::new(Waveform::Sine, 5.);
         Self::new(kind, waveform, lfo, 0.005, envelope, volume)
     }
+}
 
-    pub fn kick() -> Note {
-        let waveform = Waveform::Sine;
-        let envelope = Envelope::new(0.01, 0.4, 0.8, 0.4, EnvelopeKind::Exponential);
-        let lfo = Oscillator::new(Waveform::Sine, 1.);
-        Note::from_env(waveform, 80., 0.005, lfo, envelope, 0.1)
-    }
 
-    pub fn snare() -> Note {
-        let waveform = Waveform::Sine;
-        let envelope = Envelope::new(0.01, 0.4, 0.8, 0.4, EnvelopeKind::Exponential);
-        let lfo = Oscillator::new(Waveform::Sine, 1.);
-        Note::from_env(waveform, 140., 0.005, lfo, envelope, 0.1)
-    }
+fn midi2freq(midi_note: u8) -> f32 {
+    const A4: f32 = 440.0; // Frequency of A4
+    const A4_MIDI: u8 = 69; // MIDI note number of A4
 
-    pub fn hihat() -> Note {
-        let waveform = Waveform::Sine;
-        let envelope = Envelope::new(0.01, 0.2, 0.8, 0.2, EnvelopeKind::Linear);
-        let lfo = Oscillator::new(Waveform::Sine, 1.);
-        Note::from_env(waveform, 2000., 0.005, lfo, envelope, 1.)
-    }
-
-    pub fn cymbal() -> Note {
-        let waveform = Waveform::Sine;
-        let envelope = Envelope::new(0.03, 2., 0.8, 2., EnvelopeKind::Linear);
-        let lfo = Oscillator::new(Waveform::Sine, 1.);
-        Note::from_env(waveform, 2000., 0.005, lfo, envelope, 1.)
-    }
+    A4 * 2f32.powf((midi_note as f32 - A4_MIDI as f32) / 12.0)
 }

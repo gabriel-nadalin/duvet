@@ -70,6 +70,12 @@ impl Envelope {
         self.state
     }
 
+    pub fn trigger_legato(&mut self, level: f32) {
+        self.state = EnvelopeState::Attack;
+        self.time = 0.;
+        self.level = level;
+    }
+
     pub fn trigger(&mut self) {
         self.state = EnvelopeState::Attack;
         self.time = 0.;
