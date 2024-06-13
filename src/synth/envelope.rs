@@ -70,19 +70,13 @@ impl Envelope {
         self.state
     }
 
-    pub fn trigger_legato(&mut self, level: f32) {
-        self.state = EnvelopeState::Attack;
-        self.time = 0.;
-        self.level = level;
-    }
-
     pub fn trigger(&mut self) {
         self.state = EnvelopeState::Attack;
         self.time = 0.;
     }
 
     pub fn release(&mut self) {
-        if !matches!(self.state, EnvelopeState::Idle) {
+        if !matches!(self.state, EnvelopeState::Idle) && self.sustain > 0. {
             self.state = EnvelopeState::Release;
             self.time = 0.;
         }
@@ -104,7 +98,12 @@ impl Envelope {
             EnvelopeState::Decay => {
                 self.level = self.kind.decay(self.time, self.sustain, self.decay).min(1.);
                 if self.time >= self.decay {
-                    self.state = EnvelopeState::Sustain;
+                    if self.sustain > 0. {
+                        self.state = EnvelopeState::Sustain;
+                    } else {
+                        self.state = EnvelopeState::Release;
+                        self.time = 0.;
+                    }
                 }
             }
             EnvelopeState::Sustain => {

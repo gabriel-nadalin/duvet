@@ -1,4 +1,4 @@
-use std::{collections::HashSet, io::Read};
+use std::{collections::HashSet, io::Read, path::Path};
 
 use midly::MidiMessage;
 use termion::{async_stdin, event::Key, input::TermRead};
@@ -10,8 +10,8 @@ pub struct MidiPlayer {
 }
 
 impl MidiPlayer {
-    pub fn new(f: &[u8]) -> Self {
-        let scheduler = MidiScheduler::new(f);
+    pub fn new(file_path: &Path) -> Self {
+        let scheduler = MidiScheduler::new(file_path);
         Self {
             scheduler,
         }
@@ -138,7 +138,7 @@ impl Player {
         let violin = Instrument::lead_triangle(0.1);
         let bell = Instrument::lead_square(0.1);
         let sine = Instrument::lead_sine(0.1);
-        let drums = Instrument::drum_kit(0.25);
+        let drums = Instrument::drum_kit(0.3);
         let voice2 = Instrument::lead_triangle(0.1);
 
         synth.add_instrument(0, voice);
@@ -162,8 +162,8 @@ impl Player {
         }
     }
 
-    pub fn new_midi(f: &[u8], audio_mode: AudioMode) -> Self {
-        let midi_player = MidiPlayer::new(f);
+    pub fn new_midi(file_path: &Path, audio_mode: AudioMode) -> Self {
+        let midi_player = MidiPlayer::new(file_path);
         Self::new(PlayerKind::Midi(midi_player), audio_mode)
     }
 

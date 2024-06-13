@@ -1,7 +1,6 @@
-use std::{io::stdout, thread, time::Duration};
+use std::{env, path::Path};
 
 use duvet::{audio_out::{AudioMode, AudioOut}, synth::instrument::Instrument, player::Player};
-use termion::raw::IntoRawMode;
 
 
 
@@ -9,7 +8,12 @@ fn main() {
     let mut drum_kit = Instrument::drum_kit(1.);
     let mut out = AudioOut::new(AudioMode::Play);
 
-    let mut player = Player::new_midi(include_bytes!("../../midi/duvet.mid"), AudioMode::Play);
+    let args: Vec<String> = env::args().collect();
+    let file_path = Path::new(&args[1]);
+
+    let mut player = Player::new_midi(file_path, AudioMode::Play);
+    // let mut player = Player::new_midi(include_bytes!("../../midi/duvet.mid"), AudioMode::Play);
+
     // let mut player = Player::new_keyboard(AudioMode::Play);
 
     while player.update() {

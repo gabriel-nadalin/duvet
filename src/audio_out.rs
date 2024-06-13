@@ -8,7 +8,7 @@ use hound::{self, WavWriter};
 
 use crate::{BIT_DEPTH, BUFFER_SIZE, SAMPLE_RATE};
 
-pub fn set_pcm_params(pcm: &alsa::PCM) {
+fn set_pcm_params(pcm: &alsa::PCM) {
     let hwp = HwParams::any(&pcm).unwrap();
     hwp.set_channels(1).unwrap();
     hwp.set_rate(SAMPLE_RATE, ValueOr::Nearest).unwrap();

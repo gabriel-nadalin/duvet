@@ -7,6 +7,12 @@ pub enum InstrumentKind {
     Percussive,
 }
 
+pub enum InstrumentMode {
+    Legato,
+    Monophonic,
+    Polyphonic,
+}
+
 pub struct Instrument {
     kind: InstrumentKind,
     waveform: Waveform,
@@ -34,19 +40,19 @@ impl Instrument {
         let mut note = match self.kind {
             InstrumentKind::Melodic => {
                 let frequency = midi2freq(midi_note);
-                Note::from_env(self.waveform, frequency, self.lfo_amplitude, self.lfo, self.envelope, 0.)
+                Note::from_env(self.waveform, frequency, self.lfo_amplitude, self.lfo, self.envelope, None, 0.)
             }
             InstrumentKind::Percussive => {
                 match midi_note {
                     35 | 36 | 43 => DrumMachine::kick(),
-                    40 | 45 | 47 => DrumMachine::snare(),
+                    38 | 40 | 45 | 47 => DrumMachine::snare(),
                     44 | 46 | 53 => DrumMachine::hihat(),
                     49 | 52 | 57 => DrumMachine::cymbal(),
                     _ => return
                 }
             }
         };
-        note.note_on(true);
+        note.note_on();
         self.notes.insert(midi_note, note);
     }
 

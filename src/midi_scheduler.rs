@@ -1,3 +1,5 @@
+use std::{fs::File, io::Read, path::Path};
+
 use midly::Smf;
 
 pub struct MidiScheduler {
@@ -6,15 +8,34 @@ pub struct MidiScheduler {
 }
 
 impl MidiScheduler {
-    pub fn new(f: &[u8]) -> Self {
-        let smf = Smf::parse(f).unwrap();
+    pub fn new(file_path: &Path) -> Self {
+
+        // opening midi file
+        let mut file = File::open(file_path).unwrap();
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer).unwrap();
+
+        // configuring midi reader
+        let smf = Smf::parse(&buffer).unwrap();
         let mut tempo = 500_000;        // default midi tempo
         let ticks_per_beat = match smf.header.timing {
             midly::Timing::Metrical(value) => value.as_int(),
             _ => 480,
         };
         let mut events = Vec::new();
+
+        // getting tempo
+        for track in &smf.tracks {
+            for event in track {
+                if let midly::TrackEventKind::Meta(message) = &event.kind {
+                    if let midly::MetaMessage::Tempo(t) = message {
+                        tempo = t.as_int();
+                    }
+                }
+            }
+        }
         
+        // reading midi file
         for track in &smf.tracks {
             let mut time = 0;
             for event in track {
@@ -23,15 +44,17 @@ impl MidiScheduler {
                     let timestamp = time as f64 * (tempo as f64 / 1_000_000.0) / ticks_per_beat as f64;
                     events.push((timestamp, channel.as_int(), message.clone()));
                 }
-                else if let midly::TrackEventKind::Meta(message) = &event.kind {
-                    if let midly::MetaMessage::Tempo(t) = message {
-                        tempo = t.as_int();
-                    }
-                }
+                // else if let midly::TrackEventKind::Meta(message) = &event.kind {
+                //     if let midly::MetaMessage::Tempo(t) = message {
+                //         tempo = t.as_int();
+                //     }
+                // }
             }
         }
 
+        // sorting events by timestamp
         events.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
         Self {
             events,
             cursor: 0,

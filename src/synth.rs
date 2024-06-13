@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use instrument::Instrument;
 
 pub struct Synth {
-    instruments: HashMap<u8, Instrument>, // Key is instrument name or ID
+    instruments: HashMap<u8, Instrument>, // Key is instrument's channel number
 }
 
 impl Synth {
