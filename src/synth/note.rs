@@ -1,14 +1,15 @@
-use crate::synth::{envelope::{Envelope, EnvelopeKind, EnvelopeState}, oscillator::{Oscillator, Waveform}, instrument::Instrument};
+use crate::synth::{envelope::{Envelope, EnvelopeShape, EnvelopeState}, oscillator::{Oscillator, Waveform}, instrument::Instrument};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Note {
     oscillator: Oscillator,
     lfo: Oscillator,
-    envelope: Envelope,
+    amp_envelope: Envelope,
     freq_envelope: Option<Envelope>,
     frequency: f32,
     lfo_amplitude: f32,
     noise: f32,
+    volume: f32,
 }
 
 impl Note {
@@ -23,24 +24,29 @@ impl Note {
     //     }
     // }
 
-    pub fn from_env(waveform: Waveform, frequency: f32, lfo_amplitude: f32, lfo: Oscillator, envelope: Envelope, freq_envelope: Option<Envelope>, noise: f32) -> Self {
+    pub fn from_env(waveform: Waveform, frequency: f32, lfo_amplitude: f32, lfo: Oscillator, amp_envelope: Envelope, freq_envelope: Option<Envelope>, noise: f32) -> Self {
         Self {
             oscillator: Oscillator::new(waveform, frequency),
             lfo,
-            envelope,
+            amp_envelope,
             freq_envelope,
             frequency,
             lfo_amplitude,
             noise,
+            volume: 1.,
         }
     }
 
+    pub fn set_volume(&mut self, volume: f32) {
+        self.volume = volume;
+    }
+
     pub fn state(&self) -> EnvelopeState {
-        self.envelope.state()
+        self.amp_envelope.state()
     }
 
     pub fn note_on(&mut self) {
-        self.envelope.trigger();
+        self.amp_envelope.trigger();
 
         if let Some(ref mut envelope) = self.freq_envelope {
             envelope.trigger();
@@ -48,7 +54,7 @@ impl Note {
     }
 
     pub fn note_off(&mut self) {
-        self.envelope.release();
+        self.amp_envelope.release();
         
         if let Some(ref mut envelope) = self.freq_envelope {
             envelope.release();
@@ -56,16 +62,21 @@ impl Note {
     }
 
     pub fn next_sample(&mut self) -> f32 {
-        let amplitude = self.envelope.get_amplitude();
+        let amplitude = self.amp_envelope.get_level();
+
         let lfo_value = self.lfo.next_sample();
+        
+        let mut frequency = self.frequency;
 
         if let Some(ref mut envelope) = self.freq_envelope {
-            self.oscillator.set_frequency(self.frequency * envelope.get_amplitude());
+            frequency *= envelope.get_level();
         }
-        // self.oscillator.set_frequency(self.frequency * (1.0 + lfo_value * self.lfo_amplitude));
-
+        
+        frequency *= 1.0 + lfo_value * self.lfo_amplitude;
+        self.oscillator.set_frequency(frequency);
+        
         let noise = 2. * rand::random::<f32>() - 1.;
         let sample = (1.0 - self.noise) * self.oscillator.next_sample() + self.noise * noise;
-        amplitude * sample
+        amplitude * sample * self.volume
     }
 }

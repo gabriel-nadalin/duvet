@@ -121,9 +121,13 @@ pub enum PlayerKind {
 
 pub struct Player {
     synth: Synth,
-    kind: PlayerKind,
     out: AudioOut,
     time: f64,
+    
+    kind: PlayerKind,
+    // better way to implement this maybe??         <--- come back to this
+    // midi_player: Option<MidiPlayer>,
+    // keyboard_player: Option<KeyboardPlayer>,
 }
 
 impl Player {
@@ -140,6 +144,7 @@ impl Player {
         let sine = Instrument::lead_sine(0.1);
         let drums = Instrument::drum_kit(0.3);
         let voice2 = Instrument::lead_triangle(0.1);
+        let guitar3 = Instrument::lead_square(0.1);
 
         synth.add_instrument(0, voice);
         synth.add_instrument(1, bass);
@@ -151,6 +156,7 @@ impl Player {
         synth.add_instrument(7, sine);
         synth.add_instrument(9, drums);
         synth.add_instrument(11, voice2);
+        synth.add_instrument(10, guitar3);
 
         let out = AudioOut::new(audio_mode);
 

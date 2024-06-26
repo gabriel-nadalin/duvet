@@ -3,12 +3,12 @@ use std::f32::consts::LN_2;
 use crate::SAMPLE_RATE;
 
 #[derive(Clone, Copy, Debug)]
-pub enum EnvelopeKind {
+pub enum EnvelopeShape {
     Linear,
     Exponential,
 }
 
-impl EnvelopeKind {
+impl EnvelopeShape {
     pub fn attack(self, time: f32, attack: f32) -> f32 {
         match self {
             Self::Linear => time / attack,
@@ -46,20 +46,20 @@ pub struct Envelope {
     decay: f32,
     sustain: f32,
     release: f32,
-    kind: EnvelopeKind,
+    shape: EnvelopeShape,
     state: EnvelopeState,
     level: f32,
     time: f32,
 }
 
 impl Envelope {
-    pub fn new(attack: f32, decay: f32, sustain: f32, release: f32, kind: EnvelopeKind) -> Self {
+    pub fn new(attack: f32, decay: f32, sustain: f32, release: f32, shape: EnvelopeShape) -> Self {
         Self {
             attack,
             decay,
             sustain,
             release,
-            kind,
+            shape,
             state: EnvelopeState::Idle,
             level: 0.,
             time: 0.,
@@ -82,21 +82,21 @@ impl Envelope {
         }
     }
 
-    pub fn get_amplitude(&mut self) -> f32 {
+    pub fn get_level(&mut self) -> f32 {
         self.time += 1. / SAMPLE_RATE as f32;
         match self.state {
             EnvelopeState::Idle => {
                 self.level = 0.;
             }
             EnvelopeState::Attack => {
-                self.level = self.kind.attack(self.time, self.attack).min(1.);
+                self.level = self.shape.attack(self.time, self.attack).min(1.);
                 if self.time >= self.attack {
                     self.state = EnvelopeState::Decay;
                     self.time = 0.;
                 }
             }
             EnvelopeState::Decay => {
-                self.level = self.kind.decay(self.time, self.sustain, self.decay).min(1.);
+                self.level = self.shape.decay(self.time, self.sustain, self.decay).min(1.);
                 if self.time >= self.decay {
                     if self.sustain > 0. {
                         self.state = EnvelopeState::Sustain;
@@ -110,7 +110,7 @@ impl Envelope {
                 self.level = self.sustain;
             }
             EnvelopeState::Release => {
-                self.level = self.kind.release(self.time, self.sustain, self.release).max(0.);
+                self.level = self.shape.release(self.time, self.sustain, self.release).max(0.);
                 if self.time >= self.release {
                     self.state = EnvelopeState::Idle;
                 }

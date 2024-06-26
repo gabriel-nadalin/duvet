@@ -31,14 +31,15 @@ impl Writer {
 
                 Self::PCM(pcm)
             }
-            AudioMode::Record => {
+            AudioMode::Record(file_name) => {
                 let spec = hound::WavSpec {
                     channels: 1,
                     sample_rate: SAMPLE_RATE,
                     bits_per_sample: BIT_DEPTH,
                     sample_format: hound::SampleFormat::Int,
                 };
-                let writer = hound::WavWriter::create("output.wav", spec).unwrap();
+                let file_name = "wav/".to_string() + &file_name + ".wav";
+                let writer = hound::WavWriter::create(file_name, spec).unwrap();
         
                 Self::WAV(writer)
             }
@@ -69,7 +70,7 @@ impl Writer {
 
 pub enum AudioMode {
     Play,
-    Record,
+    Record(String),
 }
 
 pub struct AudioOut {
