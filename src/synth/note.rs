@@ -1,13 +1,13 @@
-use crate::synth::{envelope::{Envelope, EnvelopeShape, EnvelopeState}, oscillator::{Oscillator, Waveform}, instrument::Instrument};
+use crate::synth::{effect:: Effect, envelope::{Envelope, EnvelopeState}, oscillator::{Oscillator, Waveform}};
 
-#[derive(Clone, Copy, Debug)]
 pub struct Note {
     oscillator: Oscillator,
     lfo: Oscillator,
+    lfo_amplitude: f32,
     amp_envelope: Envelope,
     freq_envelope: Option<Envelope>,
+    effects: Vec<Effect>,
     frequency: f32,
-    lfo_amplitude: f32,
     noise: f32,
     volume: f32,
 }
@@ -24,14 +24,15 @@ impl Note {
     //     }
     // }
 
-    pub fn from_env(waveform: Waveform, frequency: f32, lfo_amplitude: f32, lfo: Oscillator, amp_envelope: Envelope, freq_envelope: Option<Envelope>, noise: f32) -> Self {
+    pub fn from_env(waveform: Waveform, frequency: f32, lfo_amplitude: f32, lfo: Oscillator, amp_envelope: Envelope, freq_envelope: Option<Envelope>, noise: f32, effects: Vec<Effect>) -> Self {
         Self {
             oscillator: Oscillator::new(waveform, frequency),
             lfo,
+            lfo_amplitude,
             amp_envelope,
             freq_envelope,
             frequency,
-            lfo_amplitude,
+            effects,
             noise,
             volume: 1.,
         }
@@ -76,7 +77,15 @@ impl Note {
         self.oscillator.set_frequency(frequency);
         
         let noise = 2. * rand::random::<f32>() - 1.;
-        let sample = (1.0 - self.noise) * self.oscillator.next_sample() + self.noise * noise;
-        amplitude * sample * self.volume
+        let mut sample = (1.0 - self.noise) * self.oscillator.next_sample() + self.noise * noise;
+
+        sample *= amplitude;
+
+        // apply effects
+        for effect in self.effects.clone() {
+            sample = effect.apply(sample);
+        }
+
+        sample * self.volume
     }
 }

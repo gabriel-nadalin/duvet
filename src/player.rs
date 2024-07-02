@@ -142,21 +142,21 @@ impl Player {
         let violin = Instrument::lead_triangle(0.1);
         let bell = Instrument::lead_square(0.1);
         let sine = Instrument::lead_sine(0.1);
-        let drums = Instrument::drum_kit(0.3);
+        let drums = Instrument::drum_kit(0.25);
         let voice2 = Instrument::lead_triangle(0.1);
         let guitar3 = Instrument::lead_square(0.1);
 
-        synth.add_instrument(0, voice);
-        synth.add_instrument(1, bass);
-        synth.add_instrument(4, bass2);
-        synth.add_instrument(2, guitar);
-        synth.add_instrument(6, guitar2);
-        synth.add_instrument(5, violin);
-        synth.add_instrument(3, bell);
-        synth.add_instrument(7, sine);
+        // synth.add_instrument(0, voice);
+        // synth.add_instrument(1, bass);
+        // synth.add_instrument(4, bass2);
+        // synth.add_instrument(2, guitar);
+        // synth.add_instrument(6, guitar2);
+        // synth.add_instrument(5, violin);
+        // synth.add_instrument(3, bell);
+        // synth.add_instrument(7, sine);
         synth.add_instrument(9, drums);
-        synth.add_instrument(11, voice2);
-        synth.add_instrument(10, guitar3);
+        // synth.add_instrument(11, voice2);
+        // synth.add_instrument(14, guitar3);
 
         let out = AudioOut::new(audio_mode);
 

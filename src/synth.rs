@@ -3,6 +3,7 @@ pub mod envelope;
 pub mod instrument;
 pub mod drum_machine;
 pub mod note;
+pub mod effect;
 
 use std::collections::HashMap;
 

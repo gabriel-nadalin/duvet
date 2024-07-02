@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::synth::{envelope::{Envelope, EnvelopeShape, EnvelopeState}, note::Note, oscillator::{Oscillator, Waveform}, drum_machine::DrumMachine};
+use crate::synth::{effect::Effect, envelope::{Envelope, EnvelopeShape, EnvelopeState}, note::Note, oscillator::{Oscillator, Waveform}, drum_machine::DrumMachine};
 
 pub enum InstrumentKind {
     Melodic,
@@ -16,16 +16,18 @@ pub enum InstrumentMode {
 pub struct Instrument {
     kind: InstrumentKind,
     waveform: Waveform,
+    // oscillators: Vec<Oscillator>,        TODO: substitute single waveform for this
     lfo: Oscillator,
     lfo_amplitude: f32,
     amp_envelope: Envelope,
     freq_envelope: Option<Envelope>,
+    effects: Vec<Effect>,
     volume: f32,
     notes: HashMap<u8, Note>, // Key is MIDI note number
 }
 
 impl Instrument {
-    pub fn new(kind: InstrumentKind, waveform: Waveform, lfo: Oscillator, lfo_amplitude: f32, amp_envelope: Envelope, freq_envelope: Option<Envelope>, volume: f32) -> Self {
+    pub fn new(kind: InstrumentKind, waveform: Waveform, lfo: Oscillator, lfo_amplitude: f32, amp_envelope: Envelope, freq_envelope: Option<Envelope>, volume: f32, effects: Vec<Effect>) -> Self {
         Self {
             kind,
             waveform,
@@ -33,6 +35,7 @@ impl Instrument {
             lfo_amplitude,
             amp_envelope,
             freq_envelope,
+            effects,
             volume,
             notes: HashMap::new(),
         }
@@ -42,14 +45,14 @@ impl Instrument {
         let mut note = match self.kind {
             InstrumentKind::Melodic => {
                 let frequency = midi2freq(midi_note);
-                Note::from_env(self.waveform, frequency, self.lfo_amplitude, self.lfo, self.amp_envelope, self.freq_envelope, 0.)
+                Note::from_env(self.waveform, frequency, self.lfo_amplitude, self.lfo, self.amp_envelope, self.freq_envelope, 0., self.effects.clone())
             }
             InstrumentKind::Percussive => {
                 match midi_note {
                     35 | 36 | 43 => DrumMachine::kick(),
-                    38 | 40 | 45 | 47 => DrumMachine::snare(),
-                    42 | 44 | 46 | 53 => DrumMachine::hihat(),
-                    49 | 52 | 57 => DrumMachine::cymbal(),
+                    // 38 | 40 | 45 | 47 => DrumMachine::snare(),
+                    // 42 | 44 | 46 | 53 => DrumMachine::hihat(),
+                    // 49 | 52 | 57 => DrumMachine::cymbal(),
                     _ => return
                 }
             }
@@ -79,7 +82,8 @@ impl Instrument {
         let waveform = Waveform::Square;
         let envelope = Envelope::new(0.03, 0.1, 0.7, 0.6, EnvelopeShape::Exponential);
         let lfo = Oscillator::new(Waveform::Sine, 5.);
-        Self::new(kind, waveform, lfo, 0.008, envelope, None, volume)
+        let effects = vec![];
+        Self::new(kind, waveform, lfo, 0.008, envelope, None, volume, effects)
     }
 
     pub fn lead_sine(volume: f32) -> Self {
@@ -87,7 +91,8 @@ impl Instrument {
         let waveform = Waveform::Sine;
         let envelope = Envelope::new(0.03, 0.1, 0.7, 0.6, EnvelopeShape::Exponential);
         let lfo = Oscillator::new(Waveform::Sine, 5.);
-        Self::new(kind, waveform, lfo, 0.005, envelope, None, volume)
+        let effects = vec![];
+        Self::new(kind, waveform, lfo, 0.005, envelope, None, volume, effects)
     }
 
     pub fn lead_sawtooth(volume: f32) -> Self {
@@ -95,7 +100,8 @@ impl Instrument {
         let waveform = Waveform::Sawtooth;
         let envelope = Envelope::new(0.03, 0.1, 0.7, 0.6, EnvelopeShape::Exponential);
         let lfo = Oscillator::new(Waveform::Sine, 5.);
-        Self::new(kind, waveform, lfo, 0.005, envelope, None, volume)
+        let effects = vec![Effect:: Gain(4.), Effect::HardClip(1.)];
+        Self::new(kind, waveform, lfo, 0.005, envelope, None, volume, effects)
     }
 
     pub fn lead_triangle(volume: f32) -> Self {
@@ -103,7 +109,8 @@ impl Instrument {
         let waveform = Waveform::Triangle;
         let envelope = Envelope::new(0.03, 0.1, 0.7, 0.6, EnvelopeShape::Exponential);
         let lfo = Oscillator::new(Waveform::Sine, 5.);
-        Self::new(kind, waveform, lfo, 0.005, envelope, None, volume)
+        let effects = vec![];
+        Self::new(kind, waveform, lfo, 0.005, envelope, None, volume, effects)
     }
 
     pub fn drum_kit(volume: f32) -> Self {
@@ -111,7 +118,8 @@ impl Instrument {
         let waveform = Waveform::Triangle;
         let envelope = Envelope::new(0., 0., 0., 0., EnvelopeShape::Exponential);
         let lfo = Oscillator::new(Waveform::Sine, 5.);
-        Self::new(kind, waveform, lfo, 0.005, envelope, None, volume)
+        let effects = vec![];
+        Self::new(kind, waveform, lfo, 0.005, envelope, None, volume, effects)
     }
 }
 
