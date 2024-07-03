@@ -79,12 +79,12 @@ impl Note {
         let noise = 2. * rand::random::<f32>() - 1.;
         let mut sample = (1.0 - self.noise) * self.oscillator.next_sample() + self.noise * noise;
 
-        sample *= amplitude;
-
         // apply effects
         for effect in self.effects.clone() {
             sample = effect.apply(sample);
         }
+
+        sample *= amplitude;
 
         sample * self.volume
     }

@@ -9,7 +9,7 @@ impl DrumMachine {
         let waveform = Waveform::Sine;
         let envelope = Envelope::new(0., 0.5, 0., 0., EnvelopeShape::Exponential);
         let lfo = Oscillator::new(Waveform::Sine, 1.);
-        let effects = vec![Effect::Gain(3.5)];
+        let effects = vec![Effect::Gain(10.), Effect::HardClip(1.), ];
         Note::from_env(waveform, 90., 0.005, lfo, envelope, Some(envelope), 0.05, effects)
     }
 

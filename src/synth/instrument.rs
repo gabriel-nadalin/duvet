@@ -91,7 +91,9 @@ impl Instrument {
         let waveform = Waveform::Sine;
         let envelope = Envelope::new(0.03, 0.1, 0.7, 0.6, EnvelopeShape::Exponential);
         let lfo = Oscillator::new(Waveform::Sine, 5.);
-        let effects = vec![];
+        // let effects = vec![Effect::Gain(5.), Effect::Fangs(1.), Effect::HardClip(1.), Effect::Gain(5.), ];           // very cool wave shape
+        // let effects = vec![Effect::Gain(3.), Effect::SoftCubic(1.), Effect::Gain(1.), ];                             // spooky ghosts
+        let effects = vec![Effect::Gain(1.), Effect::SoftExponential(2.), Effect::Gain(5.), ];
         Self::new(kind, waveform, lfo, 0.005, envelope, None, volume, effects)
     }
 

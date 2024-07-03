@@ -148,13 +148,13 @@ impl Player {
 
         // synth.add_instrument(0, voice);
         // synth.add_instrument(1, bass);
-        // synth.add_instrument(4, bass2);
+        synth.add_instrument(4, bass2);
         // synth.add_instrument(2, guitar);
         // synth.add_instrument(6, guitar2);
         // synth.add_instrument(5, violin);
         // synth.add_instrument(3, bell);
         // synth.add_instrument(7, sine);
-        synth.add_instrument(9, drums);
+        // synth.add_instrument(9, drums);
         // synth.add_instrument(11, voice2);
         // synth.add_instrument(14, guitar3);
 
