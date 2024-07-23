@@ -9,13 +9,18 @@ pub enum Waveform {
     Triangle,
     Sawtooth,
     AnalogSawtooth,
+    WhiteNoise,
+    PinkNoise,
+    BrownNoise,
     Exp,
 }
 
 #[derive(Clone, Copy, Debug)]
 pub struct Oscillator {
     waveform: Waveform,
+    // level: f32,              // TODO - level percentage for oscillator mixing in instrument
     frequency: f32,
+    // multiplier: f32          // TODO - frequency multiplier for harmonics
     phase: f32,
     duty: f32,
     harmonics: u32,
@@ -26,6 +31,17 @@ impl Oscillator {
         Self {
             waveform,
             frequency,
+            phase: 0.0,
+            duty: 0.5,              // duty cycle; only used for square waves
+            harmonics: 50,          // number of harmonics summed; only used for sawtooth waves
+        }
+    }
+
+    pub fn new_base(waveform: Waveform, level: f32) -> Self {
+        Self {
+            waveform,
+            // level,
+            frequency: 0.0,
             phase: 0.0,
             duty: 0.5,              // duty cycle; only used for square waves
             harmonics: 50,          // number of harmonics summed; only used for sawtooth waves
@@ -69,7 +85,9 @@ impl Oscillator {
                 }
                 -2.0/PI * sample
             }
-            Waveform::Exp => (2. * self.phase - 1.).powf(3.) + 0.5
+            Waveform::WhiteNoise => 2. * rand::random::<f32>() - 1.,
+            Waveform::Exp => (2. * self.phase - 1.).powf(3.) + 0.5,
+            _ => todo!()
         };
         self.phase = (self.phase + self.frequency / SAMPLE_RATE as f32) % 1.0;
         sample

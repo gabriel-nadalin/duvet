@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use instrument::Instrument;
 
 pub struct Synth {
-    instruments: HashMap<u8, Instrument>, // Key is instrument's channel number
+    instruments: HashMap<u8, Box<dyn Instrument>>, // Key is instrument's channel number
 }
 
 impl Synth {
@@ -20,8 +20,8 @@ impl Synth {
         }
     }
 
-    pub fn add_instrument(&mut self, channel: u8, instrument: Instrument) {
-        self.instruments.insert(channel, instrument);
+    pub fn add_instrument(&mut self, channel: u8, instrument: impl Instrument + 'static) {
+        self.instruments.insert(channel, Box::new(instrument));
     }
 
     pub fn note_on(&mut self, channel: u8, midi_note: u8) {
@@ -37,6 +37,6 @@ impl Synth {
     }
 
     pub fn next_sample(&mut self) -> f32 {
-        self.instruments.values_mut().map(|instr| instr.next_sample()).sum()
+        self.instruments.values_mut().map(|instrument| instrument.next_sample()).sum()
     }
 }

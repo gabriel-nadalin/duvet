@@ -1,4 +1,8 @@
-use crate::synth::{effect:: Effect, envelope::{Envelope, EnvelopeState}, oscillator::{Oscillator, Waveform}};
+use crate::synth::{
+    effect:: Effect,
+    envelope::{Envelope, EnvelopeState},
+    oscillator::{Oscillator, Waveform}
+};
 
 pub struct Note {
     oscillator: Oscillator,
@@ -9,7 +13,6 @@ pub struct Note {
     effects: Vec<Effect>,
     frequency: f32,
     noise: f32,
-    volume: f32,
 }
 
 impl Note {
@@ -34,12 +37,7 @@ impl Note {
             frequency,
             effects,
             noise,
-            volume: 1.,
         }
-    }
-
-    pub fn set_volume(&mut self, volume: f32) {
-        self.volume = volume;
     }
 
     pub fn state(&self) -> EnvelopeState {
@@ -84,8 +82,6 @@ impl Note {
             sample = effect.apply(sample);
         }
 
-        sample *= amplitude;
-
-        sample * self.volume
+        sample * amplitude
     }
 }

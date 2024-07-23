@@ -1,0 +1,70 @@
+{
+    "drum_kits": [
+        {
+            "name": "synth_drums",
+            "id": 118,
+
+            "parts": [
+                {
+                    "name": "kick",
+                    "id": 35,
+                    "frequency": 90,
+                    "voice": {
+                        "envelope": {
+                            "attack": 0.0,
+                            "decay": 0.5,
+                            "sustain": 0.0,
+                            "release": 0.0,
+                            "shape": "exponential"
+                        },
+                
+                        "oscillators": [
+                            {
+                                "waveform": "sine",
+                                "duty": 0.5
+                            }
+                        ],
+                
+                        "lfo": {
+                            "waveform": "sine",
+                            "frequency": 1.0,
+                            "amplitude": 0.005
+                        },
+                
+                        "effects": []
+                    }
+                },
+
+                {
+                    "name": "snare",
+                    "id": 38,
+                    "frequency": 220,
+                    "voice": {
+                        "envelope": {
+                            "attack": 0.0,
+                            "decay": 0.5,
+                            "sustain": 0.0,
+                            "release": 0.0,
+                            "shape": "exponential"
+                        },
+                
+                        "oscillators": [
+                            {
+                                "waveform": "sine",
+                                "duty": 0.5
+                            }
+                        ],
+                
+                        "lfo": {
+                            "waveform": "sine",
+                            "frequency": 1.0,
+                            "amplitude": 0.005
+                        },
+                
+                        "effects": []
+                    }
+                }
+            ]
+        }
+    ]
+}

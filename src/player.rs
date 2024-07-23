@@ -3,7 +3,16 @@ use std::{collections::HashSet, io::Read, path::Path};
 use midly::MidiMessage;
 use termion::{async_stdin, event::Key, input::TermRead};
 
-use crate::{audio_out::{AudioMode, AudioOut}, synth::instrument::Instrument, midi_scheduler::MidiScheduler, synth::Synth, SAMPLE_RATE};
+use crate::{
+    bipolar2u8,
+    audio_out::{AudioMode, AudioOut},
+    midi_scheduler::MidiScheduler,
+    synth::{
+        instrument::{voice::Voice, Instrument},
+        Synth
+    },
+    SAMPLE_RATE
+};
 
 pub struct MidiPlayer {
     scheduler: MidiScheduler,
@@ -134,17 +143,17 @@ impl Player {
     pub fn new(kind: PlayerKind, audio_mode: AudioMode) -> Self {
         let mut synth = Synth::new();
 
-        let voice = Instrument::lead_square(0.1);
-        let bass = Instrument::lead_square(0.1);
-        let bass2 = Instrument::lead_sine(0.1);
-        let guitar = Instrument::lead_sawtooth(0.1);
-        let guitar2 = Instrument::lead_sawtooth(0.1);
-        let violin = Instrument::lead_triangle(0.1);
-        let bell = Instrument::lead_square(0.1);
-        let sine = Instrument::lead_sine(0.1);
-        let drums = Instrument::drum_kit(0.25);
-        let voice2 = Instrument::lead_triangle(0.1);
-        let guitar3 = Instrument::lead_square(0.1);
+        let voice = Voice::lead_square(0.1);
+        let bass = Voice::lead_square(0.1);
+        let bass2 = Voice::lead_sine(0.1);
+        let guitar = Voice::lead_sawtooth(0.1);
+        let guitar2 = Voice::lead_sawtooth(0.1);
+        let violin = Voice::lead_triangle(0.1);
+        let bell = Voice::lead_square(0.1);
+        let sine = Voice::lead_sine(0.1);
+        let drums = Voice::drum_kit(0.25);
+        let voice2 = Voice::lead_triangle(0.1);
+        let guitar3 = Voice::lead_square(0.1);
 
         // synth.add_instrument(0, voice);
         // synth.add_instrument(1, bass);
@@ -202,9 +211,4 @@ impl Player {
     pub fn drain(&mut self) {
         self.out.drain()
     }
-}
-
-pub fn bipolar2u8(sample: f32) -> u8 {
-    let sample = ((sample + 1.) / 2.) * 255.;
-    sample.round() as u8
 }

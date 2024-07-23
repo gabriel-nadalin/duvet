@@ -1,0 +1,60 @@
+{
+    "voices": [
+        {
+            "name": "lead_square",
+            "id": 80,
+    
+            "envelope": {
+                "attack": 0.03,
+                "decay": 0.1,
+                "sustain": 0.7,
+                "release": 0.6,
+                "shape": "exponential"
+            },
+    
+            "oscillators": [
+                {
+                    "waveform": "square",
+                    "duty": 0.5
+                }
+            ],
+    
+            "lfo": {
+                "waveform": "sine",
+                "frequency": 5.0,
+                "amplitude": 0.008
+            },
+    
+            "effects": []
+        },
+
+        {
+            "name": "lead_sawtooth",
+            "id": 81,
+    
+            "envelope": {
+                "attack": 0.03,
+                "decay": 0.1,
+                "sustain": 0.7,
+                "release": 0.6,
+                "shape": "exponential"
+            },
+    
+            "oscillators": [
+                {
+                    "waveform": "analog_sawtooth",
+                    "frequency": 440.0,
+                    "harmonics": 50
+                }
+            ],
+    
+            "lfo": {
+                "waveform": "sine",
+                "frequency": 5.0,
+                "amplitude": 0.008
+            },
+    
+            "effects": []
+        }
+    ]
+}
